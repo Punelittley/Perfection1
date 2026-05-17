@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfection</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-title">
+                <h2>Perfection</h2>
+                <h2 class="accent-text">of beauty</h2>
+            </div>
+            <p class="hero-description">
+                Пространство красоты, любви и заботы. Специальные предложения для наших клиентов каждый месяц
+            </p>
+        </section>
+
+        <section class="categories-section">
+            <div class="section-header">
+                <h3>Категории</h3>
+            </div>
+            <div class="grid-container">
+                <article class="category-item">
+                    <div class="category-image" style="background-image: url('/img/yxod.jpg')">
+                        <span>Уход</span>
+                    </div>
+                    <a href="services" class="category-link">УЗНАТЬ БОЛЬШЕ</a>
+                </article>
+
+                <article class="category-item">
+                    <div class="category-image" style="background-image: url('/img/makuz.jpg')">
+                        <span>Макияж</span>
+                    </div>
+                    <a href="services" class="category-link">УЗНАТЬ БОЛЬШЕ</a>
+                </article>
+
+                <article class="category-item">
+                    <div class="category-image" style="background-image: url('/img/zxc.png')">
+                        <span>Косметология</span>
+                    </div>
+                    <a href="services" class="category-link">УЗНАТЬ БОЛЬШЕ</a>
+                </article>
+            </div>
+        </section>
+        <section class="philosophy-section">
+            <div class="philosophy-content">
+                <h3>Красота как точная наука и высокое искусство</h3>
+                <p>
+                    В Perfection Room мы верим, что истинное преображение начинается с глубокого понимания физиологии и
+                    чувства прекрасного.
+                    Наш подход — это сочетание передовых аппаратных методик и персонального внимания к каждой детали
+                    вашего образа.
+                    Мы не просто предлагаем услуги, мы создаем пространство, где современная медицина встречается с
+                    премиальным комфортом.
+                </p>
+            </div>
+        </section>
+
+        <section class="style-quiz-section" id="style-quiz" aria-labelledby="style-quiz-title">
+            <div class="style-quiz-inner">
+                <header class="style-quiz-header">
+                    <span class="style-quiz-eyebrow">Подбор образа</span>
+                    <h3 id="style-quiz-title">Какой стиль вам ближе всего?</h3>
+                    <p class="style-quiz-lead">Несколько вопросов о настроении и привычках — и мы подскажем направление:
+                        уход, макияж или комплексный подход.</p>
+                </header>
+
+                <div class="style-quiz-card">
+                    <div class="style-quiz-progress" aria-hidden="true">
+                        <div class="style-quiz-progress-track">
+                            <div class="style-quiz-progress-bar" id="style-quiz-progress-bar"></div>
+                        </div>
+                        <span class="style-quiz-step-label" id="style-quiz-step-label">Шаг 0 из 4</span>
+                    </div>
+
+                    <div class="style-quiz-panel style-quiz-intro" id="style-quiz-intro">
+                        <p class="style-quiz-intro-text">Ответьте честно — здесь нет «правильных» вариантов, только ваше
+                            ощущение себя.</p>
+                        <button type="button" class="btn-main style-quiz-start" id="style-quiz-start">Начать тест</button>
+                    </div>
+
+                    <div class="style-quiz-panel style-quiz-questions is-hidden" id="style-quiz-questions" role="region"
+                        aria-live="polite">
+                        <p class="style-quiz-question" id="style-quiz-question-text"></p>
+                        <ul class="style-quiz-options" id="style-quiz-options"></ul>
+                    </div>
+
+                    <div class="style-quiz-panel style-quiz-result is-hidden" id="style-quiz-result" role="status"
+                        aria-live="polite">
+                        <p class="style-quiz-result-label">Вам близок стиль</p>
+                        <h4 class="style-quiz-result-title" id="style-quiz-result-title"></h4>
+                        <p class="style-quiz-result-desc" id="style-quiz-result-desc"></p>
+                        <div class="style-quiz-recs">
+                            <p class="style-quiz-recs-heading">Рекомендуемые услуги</p>
+                            <ul class="style-quiz-recs-list" id="style-quiz-recs-list"></ul>
+                            <p class="style-quiz-recs-note is-hidden" id="style-quiz-recs-loading">Подбираем услуги…</p>
+                            <p class="style-quiz-recs-note is-hidden" id="style-quiz-recs-fallback">Список сейчас недоступен — загляните в раздел «Услуги».</p>
+                        </div>
+                        <div class="style-quiz-result-actions">
+                            <a href="/services" class="btn-main">Смотреть услуги</a>
+                            <button type="button" class="style-quiz-link-btn" id="style-quiz-retry">Пройти ещё раз</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="quote-banner"
+            style="background-image: url('/img/zas.jpg'); background-size: cover; background-position: center;">
+            <div class="quote-content">
+            </div>
+        </section>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.category-item').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        (function styleQuiz() {
+            const scoresInit = () => ({ natural: 0, classic: 0, glamour: 0, modern: 0 });
+            const results = {
+                natural: {
+                    title: 'Естественная свежесть',
+                    desc: 'Вам близки лёгкие текстуры, дыхание кожи и мягкий свет. Рекомендуем уход с акцентом на увлажнение и нюдовый или «no-makeup» макияж — без ощущения маски.'
+                },
+                classic: {
+                    title: 'Сдержанная элегантность',
+                    desc: 'Вы цените чистые линии и благородную простоту. Подойдут выразительный, но аккуратный макияж, ухоженный контур и процедуры для ровного тона и плотности кожи.'
+                },
+                glamour: {
+                    title: 'Выразительный образ',
+                    desc: 'Вам нравится играть контрастами и подчёркивать индивидуальность. Смело сочетайте яркие акценты с уходом за кожей — она должна «держать» сценический свет в любой ситуации.'
+                },
+                modern: {
+                    title: 'Актуальный минимализм',
+                    desc: 'Вам откликаются чёткие формы, графика и трендовые решения без лишнего. Обратите внимание на аппаратные методики и стилистику макияжа с чистыми плоскостями и матовыми акцентами.'
+                }
+            };
+            const recommendedServices = {
+                natural: [
+                    { id: 'massage', why: 'Скульптурный массаж мягко подчёркивает овал — без агрессивных методик.' },
+                    { id: 'day-makeup', why: 'Дневной макияж для «дышащей» кожи и лёгкого, узнаваемого образа.' },
+                    { id: 'cleansing', why: 'Атравматичная чистка — ровная база для нюда и ухода дома.' }
+                ],
+                classic: [
+                    { id: 'brow-styling', why: 'Чёткая линия бровей задаёт собранность и благородный акцент лица.' },
+                    { id: 'biorevitalization', why: 'Плотность и сияние кожи — опора для сдержанного, «дорогого» макияжа.' },
+                    { id: 'day-makeup', why: 'Аккуратный дневной образ, который держится и не перегружает черты.' }
+                ],
+                glamour: [
+                    { id: 'evening-makeup', why: 'Вечерний макияж для мероприятий — яркость и выразительность.' },
+                    { id: 'peeling', why: 'PRX-T33 освежает тон кожи — хорошая база под плотное покрытие и свет.' },
+                    { id: 'brow-styling', why: 'Оформление бровей усиливает взгляд и завершает контрастный образ.' }
+                ],
+                modern: [
+                    { id: 'rf-lifting', why: 'RF-лифтинг — аппаратная работа с овалом в духе прецизионного ухода.' },
+                    { id: 'peeling', why: 'Тканевые методики с предсказуемым результатом без длительной реабилитации.' },
+                    { id: 'mesotherapy', why: 'Мезотерапия — точечная работа с качеством кожи по протоколу.' }
+                ]
+            };
+            const questions = [
+                {
+                    text: 'Как вы чаще всего выбираете макияж в повседневной жизни?',
+                    options: [
+                        { label: 'Почти незаметный — главное, чтобы кожа выглядела отдохнувшей', scores: { natural: 2, classic: 1 } },
+                        { label: 'Ровный тон, стрелка или губы — всё в меру и со вкусом', scores: { classic: 2, modern: 1 } },
+                        { label: 'Люблю эксперименты: цвет, блеск, акцент на глаза или скулы', scores: { glamour: 2, modern: 1 } }
+                    ]
+                },
+                {
+                    text: 'Что для вас важнее в образе на выход?',
+                    options: [
+                        { label: 'Чтобы меня узнали, но без «перегруза»', scores: { natural: 2, classic: 1 } },
+                        { label: 'Идеальная база и выверенные детали', scores: { classic: 2, modern: 1 } },
+                        { label: 'Чтобы в зале все обернулись', scores: { glamour: 2, modern: 1 } }
+                    ]
+                },
+                {
+                    text: 'Какой уход вам ближе по ощущениям?',
+                    options: [
+                        { label: 'Нежные кремы, массаж, спокойный ритуал дома', scores: { natural: 2, classic: 1 } },
+                        { label: 'Система шагов и видимый результат по плану', scores: { classic: 1, modern: 2 } },
+                        { label: 'Технологии и быстрый эффект «до и после»', scores: { modern: 2, glamour: 1 } }
+                    ]
+                },
+                {
+                    text: 'Какой образ из журналов вам откликается сильнее всего?',
+                    options: [
+                        { label: 'Съёмка у моря: солёный ветер и едва тронутый макияж', scores: { natural: 2 } },
+                        { label: 'Чёрно-белая классика и красная помада', scores: { classic: 2, glamour: 1 } },
+                        { label: 'Подиум: графика, необычные текстуры', scores: { modern: 2, glamour: 1 } }
+                    ]
+                }
+            ];
+
+            const intro = document.getElementById('style-quiz-intro');
+            const panelQ = document.getElementById('style-quiz-questions');
+            const panelR = document.getElementById('style-quiz-result');
+            const qText = document.getElementById('style-quiz-question-text');
+            const optsEl = document.getElementById('style-quiz-options');
+            const bar = document.getElementById('style-quiz-progress-bar');
+            const stepLabel = document.getElementById('style-quiz-step-label');
+            const rTitle = document.getElementById('style-quiz-result-title');
+            const rDesc = document.getElementById('style-quiz-result-desc');
+            const startBtn = document.getElementById('style-quiz-start');
+            const retryBtn = document.getElementById('style-quiz-retry');
+            const recsList = document.getElementById('style-quiz-recs-list');
+            const recsLoading = document.getElementById('style-quiz-recs-loading');
+            const recsFallback = document.getElementById('style-quiz-recs-fallback');
+            if (!intro || !panelQ || !startBtn) return;
+
+            let index = 0;
+            let scores = scoresInit();
+
+            function setProgress() {
+                const total = questions.length;
+                const pct = intro.classList.contains('is-hidden')
+                    ? Math.round(((index + 1) / total) * 100)
+                    : 0;
+                if (bar) bar.style.width = pct + '%';
+                if (stepLabel) {
+                    if (panelR && !panelR.classList.contains('is-hidden')) {
+                        stepLabel.textContent = 'Готово';
+                        if (bar) bar.style.width = '100%';
+                    } else if (intro.classList.contains('is-hidden')) {
+                        stepLabel.textContent = 'Шаг ' + (index + 1) + ' из ' + total;
+                    } else {
+                        stepLabel.textContent = 'Шаг 0 из ' + total;
+                    }
+                }
+            }
+
+            function showQuestion(i) {
+                const q = questions[i];
+                qText.textContent = q.text;
+                optsEl.innerHTML = '';
+                q.options.forEach((opt, j) => {
+                    const li = document.createElement('li');
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'style-quiz-option';
+                    btn.setAttribute('aria-label', opt.label);
+                    btn.innerHTML = '<span class="style-quiz-option-index">' + (j + 1) + '</span><span class="style-quiz-option-text">' + opt.label + '</span>';
+                    btn.addEventListener('click', () => {
+                        Object.keys(opt.scores).forEach((k) => {
+                            scores[k] += opt.scores[k];
+                        });
+                        if (index < questions.length - 1) {
+                            index += 1;
+                            setProgress();
+                            showQuestion(index);
+                        } else {
+                            finishQuiz();
+                        }
+                    });
+                    li.appendChild(btn);
+                    optsEl.appendChild(li);
+                });
+            }
+
+            function formatPrice(p) {
+                if (!p) return '';
+                const s = String(p);
+                return s.includes('₽') ? s : s + ' ₽';
+            }
+
+            function clearRecommendations() {
+                if (!recsList) return;
+                recsList.innerHTML = '';
+                if (recsLoading) recsLoading.classList.add('is-hidden');
+                if (recsFallback) recsFallback.classList.add('is-hidden');
+            }
+
+            async function renderRecommendations(styleKey) {
+                if (!recsList) return;
+                recsList.innerHTML = '';
+                const plan = recommendedServices[styleKey] || recommendedServices.natural;
+                if (recsLoading) recsLoading.classList.remove('is-hidden');
+                if (recsFallback) recsFallback.classList.add('is-hidden');
+
+                let services = [];
+                try {
+                    const res = await fetch('/api/services');
+                    if (res.ok) services = await res.json();
+                } catch (e) {
+                    services = [];
+                }
+
+                if (recsLoading) recsLoading.classList.add('is-hidden');
+
+                const byId = {};
+                (services || []).forEach((s) => {
+                    if (s && s.id) byId[s.id] = s;
+                });
+
+                let shown = 0;
+                plan.forEach((item) => {
+                    const svc = byId[item.id];
+                    if (!svc) return;
+                    shown += 1;
+                    const li = document.createElement('li');
+                    li.className = 'style-quiz-recs-item';
+                    const link = document.createElement('a');
+                    link.className = 'style-quiz-recs-link';
+                    link.href = '/service-info?id=' + encodeURIComponent(svc.id);
+                    const row = document.createElement('div');
+                    row.className = 'style-quiz-recs-row';
+                    const titleEl = document.createElement('span');
+                    titleEl.className = 'style-quiz-recs-title';
+                    titleEl.textContent = svc.title || '';
+                    const meta = document.createElement('span');
+                    meta.className = 'style-quiz-recs-meta';
+                    const cat = svc.category || '';
+                    const price = formatPrice(svc.price);
+                    meta.textContent = [cat, price].filter(Boolean).join(' · ');
+                    row.appendChild(titleEl);
+                    row.appendChild(meta);
+                    const why = document.createElement('p');
+                    why.className = 'style-quiz-recs-why';
+                    why.textContent = item.why;
+                    link.appendChild(row);
+                    link.appendChild(why);
+                    li.appendChild(link);
+                    recsList.appendChild(li);
+                });
+
+                if (!shown && recsFallback) {
+                    recsFallback.classList.remove('is-hidden');
+                }
+            }
+
+            function finishQuiz() {
+                let best = 'natural';
+                let max = -1;
+                Object.keys(scores).forEach((k) => {
+                    if (scores[k] > max) {
+                        max = scores[k];
+                        best = k;
+                    }
+                });
+                const info = results[best];
+                panelQ.classList.add('is-hidden');
+                panelR.classList.remove('is-hidden');
+                rTitle.textContent = info.title;
+                rDesc.textContent = info.desc;
+                clearRecommendations();
+                renderRecommendations(best);
+                setProgress();
+            }
+
+            startBtn.addEventListener('click', () => {
+                scores = scoresInit();
+                index = 0;
+                intro.classList.add('is-hidden');
+                panelQ.classList.remove('is-hidden');
+                panelR.classList.add('is-hidden');
+                setProgress();
+                showQuestion(0);
+            });
+
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => {
+                    scores = scoresInit();
+                    index = 0;
+                    panelR.classList.add('is-hidden');
+                    intro.classList.remove('is-hidden');
+                    panelQ.classList.add('is-hidden');
+                    clearRecommendations();
+                    setProgress();
+                });
+            }
+
+            setProgress();
+        })();
+    </script>
+</body>
+
+</html>
