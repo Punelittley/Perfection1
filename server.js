@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
+const compression = require('compression');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -27,6 +28,7 @@ function getDbClient(token) {
     });
 }
 
+app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -73,6 +75,34 @@ app.post('/api/services', async (req, res) => {
     } catch (e) {
         console.error('Save service error:', e);
         res.status(500).json({ error: 'Failed to save service' });
+    }
+});
+
+app.put('/api/services/:id', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        const isAdmin = user && ADMIN_EMAILS.has(user.email || '');
+
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can edit services' });
+        }
+
+        const updatedService = { ...req.body, id: req.params.id };
+
+        const dbClient = getDbClient(token);
+        const { data, error } = await dbClient
+            .from('services')
+            .upsert(updatedService)
+            .select()
+            .single();
+
+        if (error) throw error;
+        res.status(200).json(data);
+    } catch (e) {
+        console.error('Update service error:', e);
+        res.status(500).json({ error: 'Failed to update service' });
     }
 });
 
@@ -289,7 +319,156 @@ app.delete('/api/orders/:id', async (req, res) => {
 });
 
 
+app.get('/api/masters', async (req, res) => {
+    try {
+        const { data: masters, error: mastersError } = await supabase
+            .from('masters')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (mastersError) throw mastersError;
+
+        const { data: categories, error: catsError } = await supabase
+            .from('master_categories')
+            .select('*');
+
+        if (catsError) throw catsError;
+
+        const combined = (masters || []).map(m => ({
+            ...m,
+            categories: (categories || []).filter(c => c.master_id === m.id).map(c => c.category)
+        }));
+
+        res.json(combined);
+    } catch (e) {
+        console.error('Fetch masters error:', e);
+        res.status(500).json({ error: 'Failed to fetch masters' });
+    }
+});
+
+app.post('/api/masters', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        const isAdmin = user && ADMIN_EMAILS.has(user.email || '');
+
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can add masters' });
+        }
+
+        const { name, photo, bio, categories } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: 'Name is required' });
+        }
+
+        const dbClient = getDbClient(token);
+        const { data: master, error: masterError } = await dbClient
+            .from('masters')
+            .insert({ name, photo, bio })
+            .select()
+            .single();
+
+        if (masterError) throw masterError;
+
+        if (categories && Array.isArray(categories) && categories.length > 0) {
+            const catRows = categories.map(cat => ({
+                master_id: master.id,
+                category: cat
+            }));
+            const { error: catInsertError } = await dbClient
+                .from('master_categories')
+                .insert(catRows);
+            if (catInsertError) throw catInsertError;
+        }
+
+        res.status(201).json({ ...master, categories: categories || [] });
+    } catch (e) {
+        console.error('Create master error:', e);
+        res.status(500).json({ error: 'Failed to create master' });
+    }
+});
+
+app.put('/api/masters/:id', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        const isAdmin = user && ADMIN_EMAILS.has(user.email || '');
+
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can edit masters' });
+        }
+
+        const masterId = req.params.id;
+        const { name, photo, bio, categories } = req.body;
+
+        const dbClient = getDbClient(token);
+        const { data: master, error: masterError } = await dbClient
+            .from('masters')
+            .update({ name, photo, bio })
+            .eq('id', masterId)
+            .select()
+            .single();
+
+        if (masterError) throw masterError;
+
+        const { error: deleteCatsError } = await dbClient
+            .from('master_categories')
+            .delete()
+            .eq('master_id', masterId);
+
+        if (deleteCatsError) throw deleteCatsError;
+
+        if (categories && Array.isArray(categories) && categories.length > 0) {
+            const catRows = categories.map(cat => ({
+                master_id: masterId,
+                category: cat
+            }));
+            const { error: catInsertError } = await dbClient
+                .from('master_categories')
+                .insert(catRows);
+            if (catInsertError) throw catInsertError;
+        }
+
+        res.json({ ...master, categories: categories || [] });
+    } catch (e) {
+        console.error('Update master error:', e);
+        res.status(500).json({ error: 'Failed to update master' });
+    }
+});
+
+app.delete('/api/masters/:id', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        const isAdmin = user && ADMIN_EMAILS.has(user.email || '');
+
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Only admins can delete masters' });
+        }
+
+        const masterId = req.params.id;
+        const dbClient = getDbClient(token);
+
+        const { error } = await dbClient
+            .from('masters')
+            .delete()
+            .eq('id', masterId);
+
+        if (error) throw error;
+
+        res.json({ message: 'Master deleted' });
+    } catch (e) {
+        console.error('Delete master error:', e);
+        res.status(500).json({ error: 'Failed to delete master' });
+    }
+});
+
+
 app.get('/', (req, res) => {
+
     res.sendFile(path.join(__dirname, 'public', 'pages', 'index.html'));
 });
 

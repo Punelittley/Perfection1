@@ -43,11 +43,8 @@
         </section>
 
         <section class="cart-list" id="cart-items-wrapper">
-            <div class="cart-empty-msg">
-                <p>Ваша корзина пока пуста.</p>
-                <a href="/services"
-                    style="color: var(--accent); text-decoration: underline; font-size: 14px; display: block; margin-top: 15px;">Перейти
-                    к выбору услуг</a>
+            <div class="cart-empty-msg" id="cart-loading-state">
+                <p>Загрузка корзины...</p>
             </div>
         </section>
 
@@ -81,7 +78,8 @@
     <script src="/scripts/burger-menu.js"></script>
     <script src="/scripts/toast.js"></script>
     <script>
-        const MASTERS = ["Анна С. (Косметолог)", "Елена В. (Эстетист)", "Марина Д. (Врач-дерматолог)"];
+        let dbMasters = [];
+        let dbServices = [];
         const SLOTS = ["10:00", "11:30", "13:00", "15:30", "17:00", "18:30"];
 
         function getMinDate() {
@@ -115,9 +113,19 @@
                 const card = document.createElement('div');
                 card.className = 'cart-item';
 
+
+                const itemCat = item.category || '';
+                const itemService = dbServices.find(s => s.title === item.title);
+                
+                const filtered = dbMasters.filter(m => {
+                    if (itemService && itemService.allowed_masters && itemService.allowed_masters.length > 0) {
+                        return itemService.allowed_masters.includes(m.id);
+                    }
+                    return !itemCat || (m.categories && m.categories.includes(itemCat));
+                });
                 let masterOptions = '<option value="">Выберите специалиста</option>';
-                MASTERS.forEach(m => {
-                    masterOptions += '<option value="' + m + '"' + (item.master === m ? ' selected' : '') + '>' + m + '</option>';
+                filtered.forEach(m => {
+                    masterOptions += '<option value="' + m.name + '"' + (item.master === m.name ? ' selected' : '') + '>' + m.name + '</option>';
                 });
 
                 let slotOptions = '<option value="">Выберите время</option>';
@@ -165,7 +173,11 @@
             loadCart();
         }
 
+        let isSubmitting = false;
+
         async function handleCheckout() {
+            if (isSubmitting) return;
+
             const btn = document.querySelector('.btn-checkout');
             const cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
             if (cart.length === 0) return;
@@ -181,22 +193,26 @@
                 return;
             }
 
-            const { data: { user } } = await window.sbClient.auth.getUser();
-            if (!user) {
-                showToast('Пожалуйста, войдите в профиль, чтобы завершить бронирование.', 'warning', 4000);
-                setTimeout(() => { location.href = '/auth'; }, 1500);
-                return;
-            }
-
+            isSubmitting = true;
             btn.disabled = true;
             btn.innerText = 'Оформление...';
 
-            let total = 0;
-            cart.forEach(item => {
-                total += parseInt(item.price.replace(/[^0-9]/g, ''));
-            });
-
             try {
+                const { data: { user } } = await window.sbClient.auth.getUser();
+                if (!user) {
+                    showToast('Пожалуйста, войдите в профиль, чтобы завершить бронирование.', 'warning', 4000);
+                    isSubmitting = false;
+                    btn.disabled = false;
+                    btn.innerText = 'Оформить визит';
+                    setTimeout(() => { location.href = '/auth'; }, 1500);
+                    return;
+                }
+
+                let total = 0;
+                cart.forEach(item => {
+                    total += parseInt(item.price.replace(/[^0-9]/g, ''));
+                });
+
                 const { error } = await window.sbClient
                     .from('orders')
                     .insert({
@@ -207,17 +223,33 @@
 
                 if (error) throw error;
 
-                showToast('Ваш запис на визит успешно оформлен! Мы свяжемся с вами для подтверждения.', 'success', 5000);
+                showToast('Ваша запись на визит успешно оформлена! Мы свяжемся с вами для подтверждения.', 'success', 5000);
                 localStorage.removeItem('perfection_cart');
                 setTimeout(() => { location.href = '/profile'; }, 2000);
             } catch (err) {
                 showToast('Ошибка при оформлении: ' + err.message, 'error', 5000);
+                isSubmitting = false;
                 btn.disabled = false;
                 btn.innerText = 'Оформить визит';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadCart);
+        async function initCartPage() {
+            try {
+                const [mastersRes, servicesRes] = await Promise.all([
+                    fetch('/api/masters'),
+                    fetch('/api/services')
+                ]);
+                if (mastersRes.ok) dbMasters = await mastersRes.json();
+                if (servicesRes.ok) dbServices = await servicesRes.json();
+            } catch (err) {
+                console.error('Failed to load data:', err);
+            }
+            loadCart();
+        }
+
+        document.addEventListener('DOMContentLoaded', initCartPage);
+
     </script>
 </body>
 

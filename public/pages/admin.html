@@ -117,6 +117,8 @@
             <button class="admin-tab-btn" onclick="switchTab('tab-users')">Клиенты</button>
             <button class="admin-tab-btn" onclick="switchTab('tab-catalog')">Услуги</button>
             <button class="admin-tab-btn" onclick="switchTab('tab-services')">+ Новая услуга</button>
+            <button class="admin-tab-btn" onclick="switchTab('tab-masters')">Мастера</button>
+            <button class="admin-tab-btn" onclick="switchTab('tab-new-master')">+ Новый мастер</button>
         </div>
 
         <div id="tab-stats" class="admin-tab-content active">
@@ -158,6 +160,8 @@
                         style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none;">
                     <input type="text" id="service-duration" placeholder="Длительность (напр. '60 мин.')" required
                         style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none;">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: -10px;">Назначить мастеров (необязательно)</div>
+                    <div id="add-service-masters" style="display: flex; gap: 15px; flex-wrap: wrap;"></div>
                     <div style="font-size: 13px; color: var(--text-muted); margin-bottom: -10px;">Фотография услуги
                         (необязательно)</div>
                     <input type="file" id="service-image-file" accept="image/*"
@@ -194,6 +198,51 @@
         <div id="tab-orders" class="admin-tab-content">
             <div class="orders-list" id="orders-list">
             </div>
+        </div>
+
+        <div id="tab-masters" class="admin-tab-content">
+            <div class="orders-list" id="masters-list">
+                <div style="text-align:center; padding: 40px; color: var(--text-muted);">Загрузка...</div>
+            </div>
+        </div>
+
+        <div id="tab-new-master" class="admin-tab-content">
+            <section class="admin-table-wrapper" style="margin-bottom: 40px; padding: 25px;">
+                <div class="admin-header" style="margin-bottom: 20px;">
+                    <h3 id="master-form-title">Добавление нового мастера</h3>
+                </div>
+                <form id="add-master-form" style="display: grid; gap: 15px; max-width: 500px;">
+                    <input type="hidden" id="master-id-field">
+                    <input type="text" id="master-name" placeholder="ФИО Мастера" required
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none; background: #fff; color: var(--text-main);">
+                    
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: -5px;">Специализация (Категории)</div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 5px;">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
+                            <input type="checkbox" name="master-cat-checkbox" value="Уход" style="cursor: pointer;"> Уход
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
+                            <input type="checkbox" name="master-cat-checkbox" value="Макияж" style="cursor: pointer;"> Макияж
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;">
+                            <input type="checkbox" name="master-cat-checkbox" value="Косметология" style="cursor: pointer;"> Косметология
+                        </label>
+                    </div>
+
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: -10px;">Фотография мастера (необязательно)</div>
+                    <input type="file" id="master-photo-file" accept="image/*"
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none; background: #fff;">
+                    
+                    <textarea id="master-bio" placeholder="Краткая биография/информация..." rows="4" required
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none; resize: none; background: #fff; color: var(--text-main);"></textarea>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" id="master-submit-btn" class="btn-main" style="flex: 1;">Добавить мастера</button>
+                        <button type="button" id="master-cancel-btn" class="btn-main" style="background: #999; border-color: #999; display: none;" onclick="resetMasterForm()">Отмена</button>
+                    </div>
+                    <div id="master-add-status" style="font-size: 14px;"></div>
+                </form>
+            </section>
         </div>
     </main>
 
@@ -246,6 +295,85 @@
         </div>
     </div>
 
+    <div id="edit-master-modal" class="custom-modal-overlay">
+        <div class="custom-modal" style="max-width: 500px; text-align: left;">
+            <h3>Редактирование мастера</h3>
+            <form id="edit-master-form" style="display: grid; gap: 15px;">
+                <input type="hidden" id="modal-master-id">
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">ФИО Мастера</label>
+                    <input type="text" id="modal-master-name" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Специализация</label>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px;"><input type="checkbox" name="modal-master-cat" value="Уход"> Уход</label>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px;"><input type="checkbox" name="modal-master-cat" value="Макияж"> Макияж</label>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px;"><input type="checkbox" name="modal-master-cat" value="Косметология"> Косметология</label>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Фотография (оставьте пустым, чтобы не менять)</label>
+                    <input type="file" id="modal-master-photo" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Биография</label>
+                    <textarea id="modal-master-bio" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; resize: none;"></textarea>
+                </div>
+                <div class="modal-buttons" style="margin-top: 10px;">
+                    <button type="button" class="modal-btn modal-btn-cancel" onclick="document.getElementById('edit-master-modal').style.display='none'">Отмена</button>
+                    <button type="submit" class="modal-btn modal-btn-confirm" id="modal-master-submit" style="background: var(--accent); border-color: var(--accent);">Сохранить</button>
+                </div>
+            </form>
+        </div>
+
+    <div id="edit-service-modal" class="custom-modal-overlay" style="z-index: 2100; overflow-y: auto;">
+        <div class="custom-modal" style="max-width: 600px; text-align: left; margin: 40px auto; max-height: 90vh; overflow-y: auto;">
+            <h3>Редактирование услуги</h3>
+            <form id="edit-service-form" style="display: grid; gap: 15px;">
+                <input type="hidden" id="modal-service-id">
+                <input type="hidden" id="modal-service-image">
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Название услуги</label>
+                    <input type="text" id="modal-service-title" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Категория</label>
+                    <select id="modal-service-category" class="admin-select" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        <option value="Уход">Уход</option>
+                        <option value="Макияж">Макияж</option>
+                        <option value="Косметология">Косметология</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Цена</label>
+                    <input type="text" id="modal-service-price" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Длительность</label>
+                    <input type="text" id="modal-service-duration" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Фотография (оставьте пустым, чтобы не менять)</label>
+                    <input type="file" id="modal-service-photo" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Назначить мастеров</label>
+                    <div id="modal-service-masters" style="display: flex; gap: 15px; flex-wrap: wrap;"></div>
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Описание</label>
+                    <textarea id="modal-service-description" rows="4" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; resize: none;"></textarea>
+                </div>
+                <div class="modal-buttons" style="margin-top: 10px;">
+                    <button type="button" class="modal-btn modal-btn-cancel" onclick="document.getElementById('edit-service-modal').style.display='none'">Отмена</button>
+                    <button type="submit" class="modal-btn modal-btn-confirm" id="modal-service-submit" style="background: var(--accent); border-color: var(--accent);">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
     <footer class="contact-strip">
         <div class="contact-grid">
             <div class="contact-box">
@@ -267,6 +395,51 @@
     <script src="/scripts/auth-status.js"></script>
     <script src="/scripts/burger-menu.js"></script>
     <script>
+        window.adminMasters = [];
+        window.adminServices = [];
+
+        function renderServiceMasterCheckboxes() {
+            const addContainer = document.getElementById('add-service-masters');
+            const editContainer = document.getElementById('modal-service-masters');
+            
+            let html = '';
+            window.adminMasters.forEach(m => {
+                html += `<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px;"><input type="checkbox" value="${m.id}" class="master-checkbox"> ${m.name}</label>`;
+            });
+
+            if (addContainer) addContainer.innerHTML = html;
+            if (editContainer) editContainer.innerHTML = html;
+        }
+        async function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const max_size = 800;
+                        if (width > height && width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        } else if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
         function addListItem(containerId) {
             const container = document.getElementById(containerId);
             const row = document.createElement('div');
@@ -282,7 +455,13 @@
             document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
 
-            event.target.classList.add('active');
+            const activeBtn = Array.from(document.querySelectorAll('.admin-tab-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            } else if (window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
+
             document.getElementById(tabId).classList.add('active');
 
             const headerTitle = document.querySelector('.admin-header h2');
@@ -302,6 +481,12 @@
             } else if (tabId === 'tab-services') {
                 headerTitle.innerText = "Добавление новой услуги";
                 headerDesc.innerText = "Заполните форму для публикации новой процедуры.";
+            } else if (tabId === 'tab-masters') {
+                headerTitle.innerText = "Специалисты клиники";
+                headerDesc.innerText = "Просматривайте, редактируйте и удаляйте специалистов клиники.";
+            } else if (tabId === 'tab-new-master') {
+                headerTitle.innerText = "Управление мастером";
+                headerDesc.innerText = "Заполните форму для добавления или редактирования специалиста.";
             }
         }
 
@@ -355,10 +540,23 @@
                     const res = await fetch('/api/services');
                     if (res.ok) {
                         const customServices = await res.json();
+                        window.adminServices = customServices;
                         renderCatalog(customServices);
                     }
                 } catch (e) {
                     console.error("Failed to load catalog", e);
+                }
+
+                try {
+                    const res = await fetch('/api/masters');
+                    if (res.ok) {
+                        const mastersList = await res.json();
+                        window.adminMasters = mastersList;
+                        renderMasters(mastersList);
+                        renderServiceMasterCheckboxes();
+                    }
+                } catch (e) {
+                    console.error("Failed to load masters in admin data loading", e);
                 }
 
                 renderStats(orders);
@@ -495,6 +693,7 @@
                         <span class="order-line-item__date" style="font-size: 16px; color: var(--text-main); font-weight: bold;">${svc.title}</span>
                         <div style="display: flex; gap: 15px; align-items: center;">
                             <span class="order-line-item__total" style="color:var(--text-main);">${svc.price}</span>
+                            <button style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick="editService('${svc.id}')">Изменить</button>
                             <button style="color: #d9534f; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick="deleteService('${svc.id}')">Удалить</button>
                         </div>
                     </div>
@@ -505,6 +704,89 @@
                 list.appendChild(card);
             });
         }
+
+        function editService(svcId) {
+            const svc = window.adminServices.find(s => s.id === svcId);
+            if (!svc) return;
+
+            document.getElementById('modal-service-id').value = svc.id;
+            document.getElementById('modal-service-title').value = svc.title || '';
+            document.getElementById('modal-service-category').value = svc.category || '';
+            document.getElementById('modal-service-price').value = svc.price || '';
+            document.getElementById('modal-service-duration').value = svc.duration || '';
+            document.getElementById('modal-service-description').value = svc.description || '';
+            document.getElementById('modal-service-image').value = svc.image || '';
+            document.getElementById('modal-service-photo').value = '';
+
+            const editContainer = document.getElementById('modal-service-masters');
+            const checkboxes = editContainer.querySelectorAll('.master-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = svc.allowed_masters && svc.allowed_masters.includes(cb.value);
+            });
+
+            document.getElementById('edit-service-modal').style.display = 'flex';
+        }
+
+        document.getElementById('edit-service-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('modal-service-submit');
+            btn.innerText = 'Сохранение...';
+            btn.disabled = true;
+
+            const svcId = document.getElementById('modal-service-id').value;
+            const fileInput = document.getElementById('modal-service-photo');
+            let base64Image = document.getElementById('modal-service-image').value;
+
+            if (fileInput.files && fileInput.files[0]) {
+                try {
+                    base64Image = await compressImage(fileInput.files[0]);
+                } catch (err) {
+                    alert("Ошибка чтения картинки.");
+                    btn.innerText = 'Сохранить';
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            const allowed_masters = [];
+            document.getElementById('modal-service-masters').querySelectorAll('.master-checkbox:checked').forEach(cb => {
+                allowed_masters.push(cb.value);
+            });
+
+            const svcData = {
+                title: document.getElementById('modal-service-title').value,
+                category: document.getElementById('modal-service-category').value,
+                price: document.getElementById('modal-service-price').value,
+                duration: document.getElementById('modal-service-duration').value,
+                description: document.getElementById('modal-service-description').value,
+                image: base64Image,
+                allowed_masters: allowed_masters
+            };
+
+            try {
+                const { data: { session } } = await window.sbClient.auth.getSession();
+                const res = await fetch('/api/services/' + svcId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(svcData)
+                });
+
+                if (res.ok) {
+                    document.getElementById('edit-service-modal').style.display = 'none';
+                    loadAdminData();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert("Ошибка: " + (err.error || "Не удалось сохранить"));
+                }
+            } catch (err) {
+                alert("Ошибка сервера: " + err.message);
+            }
+            btn.innerText = 'Сохранить';
+            btn.disabled = false;
+        });
 
         async function deleteService(id) {
             showConfirmModal("Удаление услуги", "Вы уверены, что хотите окончательно удалить эту услугу из каталога?", async () => {
@@ -603,8 +885,8 @@
 
         function openEditUserModal(userId, profile) {
             document.getElementById('edit-user-id').value = userId;
-            document.getElementById('edit-user-email').value = profile.email || '';
-            document.getElementById('edit-user-email').dataset.original = profile.email || '';
+            document.getElementById('edit-user-email').value = (profile.email && profile.email !== 'Unknown') ? profile.email : '';
+            document.getElementById('edit-user-email').dataset.original = (profile.email && profile.email !== 'Unknown') ? profile.email : '';
             document.getElementById('edit-user-password').value = '';
             document.getElementById('edit-user-name').value = profile.full_name || '';
             document.getElementById('edit-user-phone').value = profile.phone || '';
@@ -674,12 +956,7 @@
 
             if (fileInput.files && fileInput.files[0]) {
                 try {
-                    base64Image = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = (event) => resolve(event.target.result);
-                        reader.onerror = (err) => reject(err);
-                        reader.readAsDataURL(fileInput.files[0]);
-                    });
+                    base64Image = await compressImage(fileInput.files[0]);
                 } catch (err) {
                     statusEl.innerText = "Ошибка чтения картинки.";
                     statusEl.style.color = "red";
@@ -699,6 +976,11 @@
                 if (inp.value.trim()) contraindications.push(inp.value.trim());
             });
 
+            const allowed_masters = [];
+            document.getElementById('add-service-masters').querySelectorAll('.master-checkbox:checked').forEach(cb => {
+                allowed_masters.push(cb.value);
+            });
+
             const newService = {
                 title: document.getElementById('service-title').value,
                 category: document.getElementById('service-category').value,
@@ -707,7 +989,8 @@
                 description: document.getElementById('service-description').value,
                 image: base64Image,
                 indications: indications,
-                contraindications: contraindications
+                contraindications: contraindications,
+                allowed_masters: allowed_masters
             };
 
             try {
@@ -728,8 +1011,228 @@
                     document.getElementById('indications-list').innerHTML = '';
                     document.getElementById('contraindications-list').innerHTML = '';
                     loadAdminData();
+                    switchTab('tab-catalog');
+                    statusEl.innerText = '';
                 } else {
                     statusEl.innerText = "Ошибка при добавлении.";
+                    statusEl.style.color = "red";
+                }
+            } catch (err) {
+                statusEl.innerText = "Ошибка сервера: " + err.message;
+                statusEl.style.color = "red";
+            }
+        });
+
+        function renderMasters(masters) {
+            const list = document.getElementById('masters-list');
+            list.innerHTML = '';
+
+            if (masters.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Мастеров пока нет. Вы можете добавить их во вкладке "+ Новый мастер".</div>';
+                return;
+            }
+
+            masters.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'order-line-item';
+                
+                const catsText = m.categories && m.categories.length > 0
+                    ? m.categories.join(', ')
+                    : 'Нет специализации';
+
+                const photoHtml = m.photo 
+                    ? `<img src="${m.photo}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;" alt="${m.name}">`
+                    : `<div style="width: 60px; height: 60px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #aaa; margin-right: 15px;">👤</div>`;
+
+                card.innerHTML = `
+                    <div class="order-line-item__header" style="align-items: center;">
+                        <div style="display: flex; align-items: center;">
+                            ${photoHtml}
+                            <div style="display: flex; flex-direction: column;">
+                                <span class="order-line-item__date" style="font-size: 16px; color: var(--text-main); font-weight: bold;">${m.name}</span>
+                                <span style="font-size: 13px; color: var(--text-muted);">Специализация: <b>${catsText}</b></span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <button style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick='editMaster(${JSON.stringify(m).replace(/'/g, "&apos;")})'>Изменить</button>
+                            <button style="color: #d9534f; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick="deleteMaster('${m.id}')">Удалить</button>
+                        </div>
+                    </div>
+                    <div class="order-line-item__body" style="padding-left: 75px; color: var(--text-muted); font-size: 14px;">
+                        ${m.bio || 'Биография отсутствует.'}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function editMaster(master) {
+            document.getElementById('modal-master-id').value = master.id;
+            document.getElementById('modal-master-name').value = master.name;
+            document.getElementById('modal-master-bio').value = master.bio || '';
+            document.getElementById('modal-master-photo').value = '';
+
+            const checkboxes = document.querySelectorAll('input[name="modal-master-cat"]');
+            checkboxes.forEach(cb => {
+                cb.checked = master.categories && master.categories.includes(cb.value);
+            });
+
+            document.getElementById('edit-master-modal').style.display = 'flex';
+        }
+
+        function resetMasterForm() {
+            document.getElementById('master-id-field').value = '';
+            document.getElementById('master-name').value = '';
+            document.getElementById('master-bio').value = '';
+            document.getElementById('master-photo-file').value = '';
+            
+            const checkboxes = document.querySelectorAll('input[name="master-cat-checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+
+            document.getElementById('master-form-title').innerText = "Добавление нового мастера";
+            document.getElementById('master-submit-btn').innerText = "Добавить мастера";
+            document.getElementById('master-cancel-btn').style.display = "none";
+        }
+
+        async function deleteMaster(id) {
+            showConfirmModal("Удаление мастера", "Вы уверены, что хотите удалить этого мастера? Его профиль и связь со специализациями будут полностью удалены.", async () => {
+                try {
+                    const { data: { session } } = await window.sbClient.auth.getSession();
+                    const res = await fetch('/api/masters/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: 'Bearer ' + session.access_token
+                        }
+                    });
+                    if (res.ok) {
+                        alert('Мастер успешно удален!');
+                        loadAdminData();
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        alert('Ошибка: ' + (err.error || 'Не удалось удалить мастера'));
+                    }
+                } catch (e) {
+                    alert('Сетевая ошибка: ' + e.message);
+                }
+            });
+        }
+
+        document.getElementById('edit-master-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('modal-master-submit');
+            btn.innerText = 'Сохранение...';
+            btn.disabled = true;
+
+            const masterId = document.getElementById('modal-master-id').value;
+            const fileInput = document.getElementById('modal-master-photo');
+            let base64Image = '';
+
+            if (fileInput.files && fileInput.files[0]) {
+                try {
+                    base64Image = await compressImage(fileInput.files[0]);
+                } catch (err) {
+                    alert("Ошибка чтения картинки.");
+                    btn.innerText = 'Сохранить';
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            const categories = [];
+            document.querySelectorAll('input[name="modal-master-cat"]:checked').forEach(cb => {
+                categories.push(cb.value);
+            });
+
+            const masterData = {
+                name: document.getElementById('modal-master-name').value,
+                bio: document.getElementById('modal-master-bio').value,
+                categories: categories
+            };
+            if (base64Image) {
+                masterData.photo = base64Image;
+            }
+
+            try {
+                const { data: { session } } = await window.sbClient.auth.getSession();
+                const res = await fetch('/api/masters/' + masterId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(masterData)
+                });
+
+                if (res.ok) {
+                    document.getElementById('edit-master-modal').style.display = 'none';
+                    loadAdminData();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert("Ошибка: " + (err.error || "Не удалось сохранить"));
+                }
+            } catch (err) {
+                alert("Ошибка сервера: " + err.message);
+            }
+            btn.innerText = 'Сохранить';
+            btn.disabled = false;
+        });
+
+        document.getElementById('add-master-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusEl = document.getElementById('master-add-status');
+            statusEl.innerText = "Обработка фотографии...";
+            statusEl.style.color = "var(--text-color)";
+
+            const fileInput = document.getElementById('master-photo-file');
+            let base64Image = '';
+
+            if (fileInput.files && fileInput.files[0]) {
+                try {
+                    base64Image = await compressImage(fileInput.files[0]);
+                } catch (err) {
+                    statusEl.innerText = "Ошибка чтения картинки.";
+                    statusEl.style.color = "red";
+                    return;
+                }
+            }
+
+            statusEl.innerText = "Добавление...";
+
+            const categories = [];
+            document.querySelectorAll('input[name="master-cat-checkbox"]:checked').forEach(cb => {
+                categories.push(cb.value);
+            });
+
+            const masterData = {
+                name: document.getElementById('master-name').value,
+                bio: document.getElementById('master-bio').value,
+                categories: categories
+            };
+            if (base64Image) {
+                masterData.photo = base64Image;
+            }
+
+            try {
+                const { data: { session } } = await window.sbClient.auth.getSession();
+                const res = await fetch('/api/masters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(masterData)
+                });
+
+                if (res.ok) {
+                    statusEl.innerText = "Мастер успешно добавлен!";
+                    statusEl.style.color = "green";
+                    resetMasterForm();
+                    loadAdminData();
+                    switchTab('tab-masters');
+                    statusEl.innerText = '';
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    statusEl.innerText = "Ошибка: " + (err.error || "Не удалось сохранить");
                     statusEl.style.color = "red";
                 }
             } catch (err) {

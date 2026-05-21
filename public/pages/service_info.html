@@ -183,6 +183,10 @@
                     }
 
                     let cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+                    if (cart.some(item => item.id === serviceId)) {
+                        showToast('Услуга "' + service.title + '" уже есть в корзине', 'warning');
+                        return;
+                    }
                     cart.push({
                         id: serviceId, 
                         title: service.title,

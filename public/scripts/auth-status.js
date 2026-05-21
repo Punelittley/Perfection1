@@ -45,4 +45,56 @@ async function updateAuthHeader() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', updateAuthHeader);
+function updateCartBadge() {
+    const cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+    const count = cart.length;
+
+    const cartLinks = document.querySelectorAll('a[href="/cart"]');
+    cartLinks.forEach(link => {
+
+        const existingBadge = link.querySelector('.cart-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+
+        if (count > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'cart-badge';
+            badge.innerText = count;
+            link.appendChild(badge);
+        }
+    });
+}
+
+
+const originalSetItem = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+    originalSetItem.apply(this, arguments);
+    if (key === 'perfection_cart') {
+        updateCartBadge();
+    }
+};
+
+const originalRemoveItem = localStorage.removeItem;
+localStorage.removeItem = function(key) {
+    originalRemoveItem.apply(this, arguments);
+    if (key === 'perfection_cart') {
+        updateCartBadge();
+    }
+};
+
+
+window.addEventListener('storage', (e) => {
+    if (e.key === 'perfection_cart') {
+        updateCartBadge();
+    }
+});
+
+
+window.updateCartBadge = updateCartBadge;
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateAuthHeader();
+    updateCartBadge();
+});
+
